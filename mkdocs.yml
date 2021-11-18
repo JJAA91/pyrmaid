@@ -1,0 +1,12 @@
+site_name: Pyrmaid
+repo_url: https://github.com/JJAA91/pyrmaid
+site_description: A python library for converting python objects to UML diagrams using mermaid-js
+site_author: JJAA91
+use_directory_urls: false
+theme:
+  name: readthedocs
+  locale: en
+plugins:
+  - search
+nav:
+  - index.md
