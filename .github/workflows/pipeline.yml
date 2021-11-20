@@ -14,7 +14,7 @@ jobs:
       max-parallel: 9
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        python-version: [ "3.7", "3.8", "3.9", "3.10" ]
+        python-version: [ "3.8", "3.9", "3.10" ]
     steps:
       - uses: actions/checkout@v2
       - name: Setup python${{ matrix.python-version }}
@@ -26,15 +26,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install --no-root
-          poetry shell
       - name: Check Linting
-        run: flake8
+        run: poetry run flake8
       - name: Check Docstrings
-        run: pydocstyle .
+        run: poetry run pydocstyle .
       - name: Check Formatting
-        run: black --check .
+        run: poetry run black --check .
       - name: Run Unit Tests
-        run: python -m pytest -vvv --doctest-modules --junitxml=junit/test-results-${{ matrix.os }}-python${{ matrix.python-version }}.xml
+        run: poetry run pytest -vvv --doctest-modules --junitxml=junit/test-results-${{ matrix.os }}-python${{ matrix.python-version }}.xml
       - name: Upload Test Results
         uses: actions/upload-artifact@v2
         with:
