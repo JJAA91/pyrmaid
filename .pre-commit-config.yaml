@@ -7,7 +7,6 @@ repos:
     -   id: check-yaml
     -   id: check-toml
     -   id: check-added-large-files
-    -   id: name-tests-test
 -   repo: https://github.com/psf/black
     rev: 19.3b0
     hooks:
@@ -29,11 +28,6 @@ repos:
     rev: 6.1.1
     hooks:
     -   id: pydocstyle
--   repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.8.0.1
-    hooks:
-    -   id: shellcheck
--   repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.29.0
-    hooks:
-    -   id: markdownlint
+        args:
+            - --ignore=D104,D105,D107,D401,D203
+            - --match-dir='(?!tests).*'
