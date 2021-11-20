@@ -26,6 +26,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install --no-root
+          poetry shell
       - name: Check Linting
         run: flake8
       - name: Check Docstrings
