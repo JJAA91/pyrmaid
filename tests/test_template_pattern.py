@@ -8,7 +8,7 @@ import pytest
 
 from pyrmaid import constants as const
 from pyrmaid import options as opt
-from pyrmaid.introspect import ClassDiagram
+from pyrmaid.introspect import ClassDiagram, Graph
 
 log: Logger = logging.getLogger(__name__)
 
@@ -91,3 +91,12 @@ def test_template_implementation_1(direction):
     uml: ClassDiagram = ClassDiagram(ConcreteImplementation1, direction=direction)
     graph: str = uml.build()
     assert const.INHERITANCE[opt.Direction(direction)] in graph, "The uncorrect connector is arrow to the diagram"
+
+
+@pytest.mark.html
+def test_simple_html_gen():
+    """Test the html file generation logic."""
+    uml: ClassDiagram = ClassDiagram(ConcreteImplementation1)
+    graph: Graph = Graph(uml)
+    diagram: str = graph.generate()
+    assert "<!DOCTYPE html>" in diagram, "HTML document is not generated as expected"
