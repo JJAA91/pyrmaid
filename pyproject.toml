@@ -50,8 +50,7 @@ disallow_any_unimported = true
 strict_optional = true
 
 [tool.pydocstyle]
-add-ignore = "D104, D105, D107, D203, D401"
-convention = "google"
+add-ignore = "D104, D105, D107, D401, D203, D212, D213"
 match-dir = "(?!tests).*"
 
 [tool.black]
