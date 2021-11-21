@@ -13,3 +13,12 @@ def get_visibility(val: str) -> str:
     if val.startswith("_") and not val.startswith("__"):
         return const.PROTECTED
     return const.PUBLIC
+
+
+def trim_leading_underscores(name: str) -> str:
+    """Function to remove the leading underscores from a string."""
+    while True:
+        name = name if not name.startswith("_") else name[1:]
+        if not name.startswith("_"):
+            break
+    return name

@@ -48,9 +48,13 @@ def _static_method_member(member: staticmethod, key: str = "", **kwargs) -> str:
         # Ignore dunder methods
         return const.MISSING
 
+    return_anno: str = ""
     sig: inspect.Signature = inspect.signature(member.__func__)
     params: str = f"({', '.join(arg for arg in sig.parameters if arg != 'self')})"
-    return_anno: str = str(Type[sig.return_annotation]).split("typing.Type[")[1][:-1]
+
+    if sig.return_annotation is not inspect._empty:  # type: ignore
+        return_anno = str(Type[sig.return_annotation]).split("typing.Type[")[1][:-1]
+
     return f"{utils.get_visibility(key)}{key}{params}{const.STATIC} {return_anno}"
 
 
@@ -60,12 +64,14 @@ def _method_member(member: FunctionType, key: str = "", **kwargs) -> str:
         # Ignore dunder methods
         return const.MISSING
 
-    method_type = const.ABSTRACT if getattr(member, "__isabstractmethod__", False) else ""
-
+    method_type: str = const.ABSTRACT if getattr(member, "__isabstractmethod__", False) else ""
+    return_anno: str = ""
     sig: inspect.Signature = inspect.signature(member)
     params: str = f"({', '.join(arg for arg in sig.parameters if arg != 'self')})"
-    return_anno: str = str(Type[sig.return_annotation]).split("typing.Type[")[1][:-1]
-    return f"{utils.get_visibility(key)}{key}{params}{method_type} {return_anno}"
+    if sig.return_annotation is not inspect._empty:  # type: ignore
+        return_anno = str(Type[sig.return_annotation]).split("typing.Type[")[1][:-1]
+    field_name: str = utils.trim_leading_underscores(key)
+    return f"{utils.get_visibility(key)}{field_name}{params}{method_type} {return_anno}"
 
 
 @member_string.register
@@ -109,9 +115,6 @@ def _annotated_fields(member: dict, key: str = "", **kwargs) -> List[str]:
         if obj.__name__ in field_name:  # Check for mangled names
             field_name = name.split(obj.__name__)[1]  # remove the leading dunder
         vis: str = utils.get_visibility(field_name)
-        while True:
-            field_name = field_name if not field_name.startswith("_") else field_name[1:]
-            if not field_name.startswith("_"):
-                break
+        field_name = utils.trim_leading_underscores(field_name)
         member_elements.append(f"{vis}{anno.__name__} {field_name}")
     return member_elements
