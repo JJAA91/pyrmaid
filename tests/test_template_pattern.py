@@ -55,11 +55,25 @@ class AbstractTemplate(ABC):  # noqa
 
 
 class ConcreteImplementation1(AbstractTemplate):  # noqa
+
+    test1: int = 1
+    test2: int = 2
+    _test3: str = "3"
+    __test4: bool = True
+
     def required_operation1(self) -> None:  # noqa
         log.info("ConcreteImplementation1 says: Implemented Operation 1")
 
     def required_operation2(self) -> None:  # noqa
         log.info("ConcreteImplementation1 says: Implemented Operation 2")
+
+    @property
+    def dummy(self) -> str:  # noqa
+        return "dummy"
+
+    @staticmethod
+    def mytest(a: str = "method") -> str:  # noqa
+        return "static" + a
 
 
 class ConcreteImplementation2(AbstractTemplate):  # noqa
@@ -91,6 +105,11 @@ def test_template_implementation_1(direction):
     uml: ClassDiagram = ClassDiagram(ConcreteImplementation1, direction=direction)
     graph: str = uml.build()
     assert const.INHERITANCE[opt.Direction(direction)] in graph, "The uncorrect connector is arrow to the diagram"
+    assert "+mytest(a)$ str" in graph, "The static method wasnt identified as expected"
+    assert "#str test3" in graph, "The protected attribute wasnt identified as expected"
+    assert "-bool test4" in graph, "The private attribute wasnt identified as expected"
+    assert "+str dummy" in graph, "The property wasnt identified as expected"
+    assert "+required_operation1()* NoneType" in graph, "The abstract property wasnt identified as expected"
 
 
 @pytest.mark.html
