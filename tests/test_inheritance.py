@@ -13,13 +13,6 @@ from pyrmaid.introspect import ClassDiagram, Graph
 log: Logger = logging.getLogger(__name__)
 
 
-"""
-Setup objects that follow a template design.
-
-Boilerplate from https://refactoring.guru/design-patterns/template-method/python/example#example-0
-"""
-
-
 class AbstractTemplate(ABC):  # noqa
     def template_method(self) -> None:  # noqa
         self.base_operation1()
@@ -74,17 +67,6 @@ class ConcreteImplementation1(AbstractTemplate):  # noqa
     @staticmethod
     def mytest(a: str = "method") -> str:  # noqa
         return "static" + a
-
-
-class ConcreteImplementation2(AbstractTemplate):  # noqa
-    def required_operation1(self) -> None:  # noqa
-        log.info("ConcreteImplementation2 says: Implemented Operation 1")
-
-    def required_operation2(self) -> None:  # noqa
-        log.info("ConcreteImplementation2 says: Implemented Operation 2")
-
-    def hook1(self) -> None:  # noqa
-        log.info("ConcreteImplementation2 says: Overriden Hook 1")
 
 
 @pytest.mark.analyzer
