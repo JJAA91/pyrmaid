@@ -2,18 +2,21 @@
 """Module containing logic for object introspection."""
 from __future__ import annotations
 
+import builtins
+from copy import deepcopy
 import logging
 from abc import ABC, abstractmethod
 from logging import Logger
-from typing import Any, List, Tuple
+from typing import List
 
 from jinja2 import Environment, FileSystemLoader, Template, select_autoescape
 
 from pyrmaid import constants as const
 from pyrmaid import options as opt
-from pyrmaid.members import find_members
+from pyrmaid.parents import get_inheritance_tree
 
 log: Logger = logging.getLogger(__file__)
+builtin_types: List[type] = [getattr(builtins, d) for d in dir(builtins) if isinstance(getattr(builtins, d), type)]
 
 
 class Graph:
@@ -56,44 +59,40 @@ class ClassDiagram(GraphStrategy):
     def __init__(self, obj: object, direction: str = "down") -> None:
         self.obj: object = obj
         self.direction: opt.Direction = opt.Direction(direction)
-        self.ancestry: List[str]
-
-        _ancestry: List[Tuple[str, str]] = self._find_parents()
-        _parents: Tuple[Any, ...]
-        _members: Tuple[Any, ...]
-        _parents, _members = list(zip(*_ancestry))
-        if self.direction == opt.Direction.DOWN:
-            self.ancestry = list(_parents)[::-1]
-        if self.direction == opt.Direction.UP:
-            self.ancestry = list(_parents)
-        self.members: List[str] = list(_members)
 
     def build(self) -> str:
         """Method to build a class diagram UML."""
         uml: List[str] = ["classDiagram"]
 
-        for idx, obj in enumerate(self.ancestry):
-            if idx + 1 != len(self.ancestry):
-                uml.append(f" {const.INHERITANCE[self.direction]} ".join([obj, self.ancestry[idx + 1]]))
+        ancestry: List[str]
+        members: List[str]
+        members, ancestry = get_inheritance_tree(self.obj, direction=self.direction)
 
-        uml.extend(self.members)
+        for idx, obj in enumerate(ancestry):
+            if idx + 1 != len(ancestry):
+                uml.append(f" {const.INHERITANCE[self.direction]} ".join([obj, ancestry[idx + 1]]))
+
+        uml.extend(members)
+
+        composed = self._find_composed()
+
+        for comp_obj in composed:
+            uml.append(f"{self.obj.__name__} {const.COMPOSITION[self.direction]} {comp_obj}")
+            uml.extend(composed[comp_obj]["members"])
 
         return "\n".join(uml)
+    
+    def _find_composed(self):
+        init_anno: dict = deepcopy(self.obj.__init__.__annotations__)
+        init_anno.pop("return")  # __init__ can only ever return None
+        composed: dict = {}
+        for cls_ in init_anno.values():
+            if cls_ in builtin_types:
+                # Don't care about builtins
+                continue
+            # If annotated type is not a built in, then find its lineage
+            cls_members, cls_ancestry = get_inheritance_tree(cls_, direction=self.direction)
+            composed[cls_.__name__] = {"members": cls_members, "ancestry": cls_ancestry}
+        return composed
+            
 
-    def _find_parents(self) -> List[Tuple[str, str]]:
-        """Method to determine the parent classes of the object."""
-
-        def ancestry(obj: object, inheriters: List[Tuple[str, str]] = None) -> List[Tuple[str, str]]:
-            if inheriters is None:
-                inheriters = [(getattr(self.obj, "__name__"), find_members(obj))]
-
-            parent = getattr(obj, "__base__", const.MISSING)
-
-            if parent is object:
-                return inheriters
-
-            obj_members = find_members(parent)
-            inheriters.append((getattr(parent, "__name__", const.MISSING), obj_members))
-            return ancestry(parent, inheriters)
-
-        return ancestry(self.obj)
