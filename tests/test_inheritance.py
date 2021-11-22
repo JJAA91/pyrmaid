@@ -2,6 +2,7 @@
 # noqa
 import logging
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from logging import Logger
 
 import pytest
@@ -69,6 +70,29 @@ class ConcreteImplementation1(AbstractTemplate):  # noqa
         return "static" + a
 
 
+@dataclass
+class ConcreteImplementation2(AbstractTemplate):  # noqa
+
+    test1: int
+    test2: int
+    _test3: str
+    __test4: bool
+
+    def required_operation1(self) -> None:  # noqa
+        log.info("ConcreteImplementation1 says: Implemented Operation 1")
+
+    def required_operation2(self) -> None:  # noqa
+        log.info("ConcreteImplementation1 says: Implemented Operation 2")
+
+    @property
+    def dummy(self) -> str:  # noqa
+        return "dummy"
+
+    @staticmethod
+    def mytest(a: str = "method") -> str:  # noqa
+        return "static" + a
+
+
 @pytest.mark.analyzer
 @pytest.mark.parametrize(
     "direction",
@@ -82,9 +106,34 @@ class ConcreteImplementation1(AbstractTemplate):  # noqa
         ),
     ],
 )
-def test_template_implementation_1(direction):
+def test_template_implementation(direction):
     """Test inheritance is correctly inspected, and represented in the requested direction."""
     uml: ClassDiagram = ClassDiagram(ConcreteImplementation1, direction=direction)
+    graph: str = uml.build()
+    assert const.INHERITANCE[opt.Direction(direction)] in graph, "The uncorrect connector is arrow to the diagram"
+    assert "+mytest(a)$ str" in graph, "The static method wasnt identified as expected"
+    assert "#str test3" in graph, "The protected attribute wasnt identified as expected"
+    assert "-bool test4" in graph, "The private attribute wasnt identified as expected"
+    assert "+str dummy" in graph, "The property wasnt identified as expected"
+    assert "+required_operation1()* NoneType" in graph, "The abstract property wasnt identified as expected"
+
+
+@pytest.mark.analyzer
+@pytest.mark.parametrize(
+    "direction",
+    [
+        pytest.param("up", id="UpDirection"),
+        pytest.param("down", id="DownDirection"),
+        pytest.param(
+            "insideout",
+            id="InvalidDirection",
+            marks=pytest.mark.xfail(raises=ValueError, reason="Not a valid direction option", strict=True),
+        ),
+    ],
+)
+def test_template_implementation_dataclass(direction):
+    """Test inheritance is correctly inspected, and represented in the requested direction."""
+    uml: ClassDiagram = ClassDiagram(ConcreteImplementation2, direction=direction)
     graph: str = uml.build()
     assert const.INHERITANCE[opt.Direction(direction)] in graph, "The uncorrect connector is arrow to the diagram"
     assert "+mytest(a)$ str" in graph, "The static method wasnt identified as expected"
