@@ -13,7 +13,6 @@ log: Logger = logging.getLogger(__name__)
 
 
 class ComposedElement:
-
     def __init__(self) -> None:
         self.name: str = "Giovanni Giorgio, but everybody calls me Giorgio"
 
@@ -22,14 +21,13 @@ class ComposedElement:
 
 
 class Implementation:
-
     def __init__(self, element: ComposedElement, element2: str) -> None:
         self.element: ComposedElement = element
         self.element2: str = element2
-    
+
     def do_something(self) -> None:
         self.element.log_name()
-    
+
     def get_name(self) -> str:
         return self.element.name
 

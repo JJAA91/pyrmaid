@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*
 """Module containing logic for finding the object inheritance."""
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
 
 from pyrmaid import constants as const
 from pyrmaid import options as opt

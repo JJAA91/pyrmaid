@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import builtins
-from copy import deepcopy
 import logging
 from abc import ABC, abstractmethod
+from copy import deepcopy
 from logging import Logger
 from typing import List
 
@@ -81,7 +81,7 @@ class ClassDiagram(GraphStrategy):
             uml.extend(composed[comp_obj]["members"])
 
         return "\n".join(uml)
-    
+
     def _find_composed(self):
         init_anno: dict = deepcopy(self.obj.__init__.__annotations__)
         init_anno.pop("return")  # __init__ can only ever return None
@@ -94,5 +94,3 @@ class ClassDiagram(GraphStrategy):
             cls_members, cls_ancestry = get_inheritance_tree(cls_, direction=self.direction)
             composed[cls_.__name__] = {"members": cls_members, "ancestry": cls_ancestry}
         return composed
-            
-
